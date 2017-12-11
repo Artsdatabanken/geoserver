@@ -23,5 +23,19 @@ RUN wget http://sourceforge.net/projects/geoserver/files/GeoServer/${GS_VERSION}
     wget https:${sqlJdbc%?} -P ${pluginsDir}
 
 # Enable CORS
-RUN perl -i -0777 -pe 's/<!--\s*?(<filter.*?cross-origin.*?\/filter>)\s*?-->/$1/s' ${webInfDir}/web.xml
-RUN perl -i -0777 -pe 's/<!--\s*?(<filter-mapping.*?cross-origin.*?\/filter-mapping>)\s*?-->/$1/s' ${webInfDir}/web.xml
+RUN sed -i '\:</web-app>:i\
+    <filter>\
+        <filter-name>CorsFilter</filter-name>\
+        <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>\
+    </filter>\
+\
+    <filter-mapping>\
+        <filter-name>CorsFilter</filter-name>\
+        <url-pattern>/*</url-pattern>\
+    </filter-mapping>\
+\
+    <init-param>\
+        <param-name>cors.support.credentials</param-name>\
+        <param-value>true</param-value>\
+    </init-param>' ${webInfDir}/web.xml
+
